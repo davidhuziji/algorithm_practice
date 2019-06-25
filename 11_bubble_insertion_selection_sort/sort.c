@@ -46,27 +46,6 @@ static void *generate_array(int *nr)
 	return array;
 }
 
-#if 0
-static void list_insert(struct list_node *prev, struct list_node *node)
-{
-	if (!prev || !next)
-		return;
-
-
-}
-
-static void *generate_list(struct list_node *head, char *array, int nr)
-{
-	if (!head || !array || !nr)
-		return NULL;
-
-	head->data = 0;
-	head->next = NULL;
-
-
-}
-#endif
-
 static void bubble_sort_array(char *array, int nr)
 {
 	char *local, i, j, tmp;
@@ -205,6 +184,219 @@ static void selection_sort_array(char *array, int nr)
 	free(local);
 }
 
+static void list_insert(struct list_node *prev, struct list_node *node)
+{
+	struct list_node *tmp;
+
+	if (!prev || !node)
+		return;
+
+	tmp = prev->next;
+	prev->next = node;
+	node->next = tmp;
+}
+
+static struct list_node *list_del(struct list_node *node)
+{
+	struct list_node *next;
+
+	if (!node || !node->next)
+		return NULL;
+
+	next = node->next;
+	node->next = next->next;
+	next->next = NULL;
+
+	return next;
+}
+
+static void free_list(struct list_node *head)
+{
+	struct list_node *tmp, *node;
+
+	node = head->next;
+	while (node) {
+		tmp = node->next;
+		free(node);
+		node = tmp;
+	}
+}
+
+static void print_list(struct list_node *head)
+{
+	struct list_node *node;
+
+	node = head->next;
+	while (node) {
+		printf("%d ", node->data);
+		node = node->next;
+	}
+	printf("\n");
+}
+
+static void generate_list(struct list_node *head, char *array, int nr)
+{
+	int i;
+	struct list_node *node, *last;
+
+	if (!head || !array || !nr)
+		return;
+
+	head->data = 0;
+	head->next = NULL;
+	last = head;
+
+	for (i = 0; i < nr; i++) {
+		node = malloc(sizeof(*node));
+		if (!node)
+			goto free_list;
+
+		node->data = array[i];
+		node->next = NULL;
+
+		list_insert(last, node);
+		last = node;
+	}
+
+	return;
+
+free_list:
+	free_list(head->next);
+}
+
+/*
+ * It is complext to exchange two list nodes.
+ * It is necessary to keep tack of the previous node before the two nodes to
+ * be exchanged.
+ */
+static void bubble_sort_list(struct list_node *head, int nr)
+{
+	int i, j;
+	bool exchange;
+	struct list_node *prev, *curr, *next;
+
+	if (!head || !head->next || (nr == 0))
+		return;
+
+	for (i = 0; i < nr - 1; i++) {
+		exchange = false;
+		prev = head;
+		curr = head->next;
+		next = curr->next;
+
+		for (j = 0; j < nr - i - 1; j++) {
+			if (curr->data > next->data) {
+				prev->next = next;
+				curr->next = next->next;
+				next->next = curr;
+				exchange = true;
+			}
+
+			prev = prev->next;
+			curr = prev->next;
+			next = curr->next;
+		}
+
+		if (!exchange)
+			break;
+	}
+
+	printf("\nAfter buble sort with list: \t\t");
+	print_list(head);
+}
+
+/*
+ * Link the sorted part in the new list.
+ * It is still necessary to keep track of the previous node after which the
+ * node under comparasion is inserted.
+ * To keep stability of list, the node under comparasion must be insert before
+ * the node larger than it.
+ */
+static void insertion_sort_list(struct list_node *head, int nr)
+{
+	struct list_node new_head, *node, *prev, *cmp;
+	bool insert;
+
+	if (!head || !head->next || (nr == 0))
+		return;
+
+	new_head.data = 0;
+	new_head.next = NULL;
+
+	node = list_del(head);
+	list_insert(&new_head, node);
+
+	while (head->next) {
+		node = list_del(head);
+		prev = &new_head;
+		cmp = prev->next;
+		insert = false;
+
+		while (cmp) {
+			if (node->data < cmp->data) {
+				list_insert(prev, node);
+				insert = true;
+				break;
+			}
+
+			prev = cmp;
+			cmp = prev->next;
+		}
+
+		if (!insert)
+			list_insert(prev, node);
+	}
+
+	printf("\nAfter insertion sort with list: \t");
+	print_list(&new_head);
+
+	head->next = new_head.next;
+}
+
+/*
+ * Link the sorted part to a new list.
+ * It is necessary to keep track of the previous node thus the least node can
+ * be deleted from the original list.
+ * Also keep track of the tail of new list thus the least node can be added
+ * to the tail of new list more easilier.
+ */
+static void selection_sort_list(struct list_node *head, int nr)
+{
+	struct list_node new_head, *node, *prev, *least_prev_node, *tail;
+	int least;
+
+	if (!head || !head->next || (nr == 0))
+		return;
+
+	new_head.data = 0;
+	new_head.next = NULL;
+	tail = &new_head;
+
+	while (head->next) {
+		least = head->next->data;
+		least_prev_node = head;
+		prev = head->next;
+
+		while (prev->next) {
+			if (prev->next->data < least) {
+				least = prev->next->data;
+				least_prev_node = prev;
+			}
+
+			prev = prev->next;
+		}
+
+		node = list_del(least_prev_node);
+		list_insert(tail, node);
+		tail = node;
+	}
+
+	printf("\nAfter selection sort with list: \t");
+	print_list(&new_head);
+
+	head->next = new_head.next;
+}
+
 int main(void)
 {
 	char *array;
@@ -220,9 +412,20 @@ int main(void)
 	insertion_sort_array(array, nr);
 
 	selection_sort_array(array, nr);
-#if 0
+
 	generate_list(&head, array, nr);
-#endif
+	bubble_sort_list(&head, nr);
+	free_list(&head);
+
+	generate_list(&head, array, nr);
+	insertion_sort_list(&head, nr);
+	free_list(&head);
+
+	generate_list(&head, array, nr);
+	selection_sort_list(&head, nr);
+	free_list(&head);
+
+	free(array);
 
 	return 0;
 }
