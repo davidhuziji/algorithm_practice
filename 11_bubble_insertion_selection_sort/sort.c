@@ -81,7 +81,12 @@ static void bubble_sort_array(char *array, int nr)
 
 	memcpy(local, array, nr);
 
-	for (i = 0; i < nr; i++) {
+	/*
+	 * XXX
+	 * The outer loop limit should be n - 1, instead of n. After n - 1 loop,
+	 * the largest n - 1 elements have been moved.
+	 */
+	for (i = 0; i < nr - 1; i++) {
 		change = false;
 		/*
 		 * Take care of the limit of j.
@@ -106,7 +111,7 @@ static void bubble_sort_array(char *array, int nr)
 			break;
 	}
 
-	printf("\nAfter bubble sort: ");
+	printf("\nAfter bubble sort with array: \t\t");
 	for (i = 0; i < nr; i++)
 		printf("%d ", local[i]);
 	printf("\n");
@@ -155,7 +160,7 @@ static void insertion_sort_array(char *array, int nr)
 		local[j + 1] = tmp;
 	}
 
-	printf("\nAfter insertion sort: ");
+	printf("\nAfter insertion sort with array: \t");
 	for (i = 0; i < nr; i++)
 		printf("%d ", local[i]);
 	printf("\n");
@@ -192,7 +197,7 @@ static void selection_sort_array(char *array, int nr)
 		local[least_idx] = least;
 	}
 
-	printf("\nAfter slection sort: ");
+	printf("\nAfter selection sort with array: \t");
 	for (i = 0; i < nr; i++)
 		printf("%d ", local[i]);
 	printf("\n");
