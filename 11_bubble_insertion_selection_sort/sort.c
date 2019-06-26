@@ -48,7 +48,8 @@ static void *generate_array(int *nr)
 
 static void bubble_sort_array(char *array, int nr)
 {
-	char *local, i, j, tmp;
+	char *local, tmp;
+	int i, j;
 	bool change;
 
 	if (!array || (nr == 0))
@@ -100,7 +101,8 @@ static void bubble_sort_array(char *array, int nr)
 
 static void insertion_sort_array(char *array, int nr)
 {
-	char *local, i, j, tmp;
+	char *local, tmp;
+	int i, j;
 
 	if (!array || (nr == 0))
 		return;
@@ -149,7 +151,8 @@ static void insertion_sort_array(char *array, int nr)
 
 static void selection_sort_array(char *array, int nr)
 {
-	char *local, i, j, least, least_idx;
+	char *local, least;
+	int i, j, least_idx;
 
 	if (!array || (nr == 0))
 		return;
