@@ -222,8 +222,6 @@ static bool detect_list_ring(struct single_list_node *head)
 		if (!double_node)
 			return false;
 
-		printf("single %d double %d\n", single_node->data,
-		       double_node->data);
 		if (single_node->data == double_node->data)
 			return true;
 	}
@@ -356,7 +354,53 @@ static void merge_sort_list_practice(int start, size_t len)
 cleanup_list1:
 		free_list(head1);
 	}
+}
 
+/*
+ * Record the last node in interval N and the previous last node in interval N.
+ * Go through the list from the previous last intveral node, instead of from
+ * the head of list.
+ */
+static void find_last_n_node(void)
+{
+	struct single_list_node *head, *node, *interval_node = NULL;
+	struct single_list_node *prev_interval_node;
+	int i, j = 0, k, len, interval, rand_test = 0x10;
+
+	for (i = 0; i < rand_test; i++) {
+		len = rand() % 0x50 + 0x50;
+
+		head = generate_list(0x1, len, 1, false);
+		if (!head)
+			return;
+		print_list(head);
+
+		interval = rand() % 0x5 + 0x5;
+
+		node = head;
+		j = 0;
+		while (node->next) {
+			node = node->next;
+
+			j++;
+			if (j == interval) {
+				prev_interval_node = interval_node;
+				interval_node = node;
+				j = 0;
+			}
+		}
+
+		if (!prev_interval_node)
+			printf("The lenght is too short\n");
+
+		node = prev_interval_node;
+		for (k = 0; k <= j; k++)
+			node = node->next;
+
+		printf("Last %d node is %d\n", interval, node->data);
+
+		free_list(head);
+	}
 }
 
 int main(void)
@@ -372,6 +416,9 @@ int main(void)
 
 	printf("Practice how to merge two sorted lists\n");
 	merge_sort_list_practice(0x1, 10);
+
+	printf("Find the last N node\n");
+	find_last_n_node();
 
 	return 0;
 }
