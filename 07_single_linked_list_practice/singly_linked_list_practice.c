@@ -403,6 +403,54 @@ static void find_last_n_node(void)
 	}
 }
 
+/*
+ * Continue using single-step and double-step search.
+ * When double-step search reaches the end of list, the current single-step is
+ * the middle node.
+ * Implement different output for odd number and even numer of nodes in list.
+ */
+static void find_middle_node(void)
+{
+	struct single_list_node *head, *single_node, *double_node;
+	int i, len, rand_test = 0x10;
+	bool odd = false;
+
+	for (i = 0; i < rand_test; i++) {
+		len = rand() % 0x10 + 0x10;
+
+		head = generate_list(0x1, len, 1, false);
+		if (!head)
+			return;
+		print_list(head);
+
+		single_node = head;
+		double_node = head;
+		while (1) {
+			double_node = double_node->next;
+			if (!double_node) {
+				odd = false;
+				break;
+			}
+			double_node = double_node->next;
+			if (!double_node) {
+				odd = true;
+				break;
+			}
+			single_node = single_node->next;
+		}
+
+		printf("Totally %d nodes. ", len);
+		if (odd)
+			printf("The middle node is %d\n",
+			       single_node->next->data);
+		else
+			printf("The middle nodes are %d and %d\n",
+			       single_node->data, single_node->next->data);
+
+		free_list(head);
+	}
+}
+
 int main(void)
 {
 	srand(time(NULL));
@@ -411,14 +459,17 @@ int main(void)
 	reverse_single_list(0x0, 10);
 	reverse_single_list(0x1, 1);
 
-	printf("Practice how to detect a ring in a list\n");
+	printf("\nPractice how to detect a ring in a list\n");
 	test_list_ring(0x1, 20);
 
-	printf("Practice how to merge two sorted lists\n");
+	printf("\nPractice how to merge two sorted lists\n");
 	merge_sort_list_practice(0x1, 10);
 
-	printf("Find the last N node\n");
+	printf("\nFind the last N node\n");
 	find_last_n_node();
+
+	printf("\nFind the middle node\n");
+	find_middle_node();
 
 	return 0;
 }
