@@ -113,7 +113,7 @@ static void reverse_single_list(int start, size_t len)
 			break;
 
 		node = list_del_head(head);
-		list_insert_node(last, node);
+		list_add_node(last, node);
 	}
 
 	print_list(head);
@@ -304,16 +304,15 @@ static void merge_sort_lists(struct single_list_node *head1,
 		if (!node1)
 			goto finish;
 
-		prev = node2;
 		while (node1->data > node2->data) {
 			prev = node2;
 
 			node2 = node2->next;
 			if (node2 == NULL)
-				goto finish;
+				break;
 		}
 
-		list_insert_node(prev, node1);
+		list_add_node(prev, node1);
 		node2 = node1;
 	}
 
@@ -335,8 +334,11 @@ static void merge_sort_list_practice(int start, size_t len)
 		printf("list 1: ");
 		print_list(head1);
 
+		/*
+		 * Give a chance to make the first head in second list smaller
+		 * than the that of first one.
+		 */
 		start--;
-
 		step = rand() % 3;
 		start += step;
 

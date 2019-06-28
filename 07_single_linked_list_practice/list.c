@@ -22,8 +22,7 @@ struct single_list_node *get_list_tail(const struct single_list_node *head)
 	return node;
 }
 
-int list_insert_node(struct single_list_node *prev,
-		     struct single_list_node *node)
+int list_add_node(struct single_list_node *prev, struct single_list_node *node)
 {
 	struct single_list_node *next;
 
