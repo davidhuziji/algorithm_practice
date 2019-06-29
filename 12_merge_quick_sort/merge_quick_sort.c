@@ -41,7 +41,7 @@ static void *generate_array(int *nr)
 
 static int __merge_parts(char *array, int start_idx, int end_idx)
 {
-	int i = start_idx, j, k = 0, mid_idx, p;
+	int i = start_idx, j, k = 0, n, mid_idx, p;
 	char *tmp;
 
 	mid_idx = (start_idx + end_idx) / 2;
@@ -51,16 +51,18 @@ static int __merge_parts(char *array, int start_idx, int end_idx)
 	if (!tmp)
 		return -ENOMEM;
 
-	while (k <= (end_idx - start_idx)){
+	while (k < (end_idx - start_idx + 1)){
 		/*
 		 * Add an additional condition check to deal with the case that
 		 * array[i] is longer than array[j].
 		 */
-		if ((array[i] <= array[j]) || (j > end_idx)) {
+		if ((i <= mid_idx) &&
+		    ((j > end_idx) || (array[i] <= array[j]))) {
 			tmp[k] = array[i];
 			i++;
 		} else {
 			tmp[k] = array[j];
+#if 0
 			/*
 			 * Add a watch element here to deal with the case that
 			 * the second half is shorter than the first half.
@@ -69,6 +71,7 @@ static int __merge_parts(char *array, int start_idx, int end_idx)
 			 * array[j] is put into tmp[].
 			 */
 			array[j] = array[end_idx];
+#endif
 			j++;
 		}
 		k++;
