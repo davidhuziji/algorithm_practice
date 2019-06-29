@@ -22,15 +22,13 @@ static void *generate_array(int *nr)
 	if (!nr)
 		return NULL;
 
-	srand(time(NULL));
-
 	num = rand() % MAX_NR_ELEMENTS + MIN_NR_ELEMENTS;
 
 	array = malloc(num * sizeof(*array));
 	if (!array)
 		return NULL;
 
-	printf("Generate an array:\t");
+	printf("\nGenerate an array length %d:\n", num);
 	for (i = 0; i < num; i++) {
 		array[i] = rand() % BASE_VALUE;
 		printf("%d ", array[i]);
@@ -107,7 +105,7 @@ static int __merge_sort(char *array, int start_idx, int end_idx)
 	return ret;
 }
 
-static void merge_sort(char *array, int nr)
+static void merge_sort(char *array, int nr, int k)
 {
 	char *local;
 	int i;
@@ -127,6 +125,8 @@ static void merge_sort(char *array, int nr)
 	for (i = 0; i < nr; i++)
 		printf("%d ", local[i]);
 	printf("\n");
+	printf("The largest %d element is %d\n", k + 1, local[k]);
+
 
 	free(local);
 }
@@ -188,7 +188,7 @@ static int __quick_sort(char *array, int start_idx, int end_idx)
 	return ret;
 }
 
-static void quick_sort(char *array, int nr)
+static void quick_sort(char *array, int nr, int k)
 {
 	char *local;
 	int i;
@@ -208,6 +208,53 @@ static void quick_sort(char *array, int nr)
 	for (i = 0; i < nr; i++)
 		printf("%d ", local[i]);
 	printf("\n");
+	printf("The largest %d element is %d\n", k + 1, local[k]);
+
+	free(local);
+}
+
+static void partition_k_large(char *array, int start_idx, int end_idx, int k)
+{
+	int pivot_idx;
+
+	if (start_idx >= end_idx) {
+		if (start_idx == k)
+			/*
+			 * Special case when the largest K element is in a
+			 * partition with a single element
+			 */
+			printf("\nThe largest %d data is %d\n", k + 1,
+			       array[start_idx]);
+		return;
+	}
+
+	pivot_idx = __quick_partition(array, start_idx, end_idx);
+	if (pivot_idx == k) {
+		printf("\nThe largest %d data is %d\n", k + 1,
+		       array[pivot_idx]);
+		return;
+	}
+
+	if (k < pivot_idx)
+		partition_k_large(array, start_idx, pivot_idx - 1, k);
+	else
+		partition_k_large(array, pivot_idx + 1, end_idx, k);
+}
+
+static void search_k_large(char *array, int nr, int k)
+{
+	char *local;
+
+	if (!array || (nr == 0))
+		return;
+
+	local = malloc(nr * sizeof(*local));
+	if (!local)
+		return;
+
+	memcpy(local, array, nr);
+
+	partition_k_large(local, 0, nr - 1, k);
 
 	free(local);
 }
@@ -215,17 +262,25 @@ static void quick_sort(char *array, int nr)
 int main(void)
 {
 	char *array;
-	int nr;
+	int i, nr, k, round = 0x5;
 
-	array = (char *)generate_array(&nr);
-	if (!array)
-		return -ENOMEM;
+	srand(time(NULL));
 
-	merge_sort(array, nr);
+	for (i = 0; i < round; i++) {
+		array = (char *)generate_array(&nr);
+		if (!array)
+			return -ENOMEM;
 
-	quick_sort(array, nr);
+		k = rand() % nr;
 
-	free(array);
+		merge_sort(array, nr, k);
+
+		quick_sort(array, nr, k);
+
+		search_k_large(array, nr, k);
+
+		free(array);
+	}
 
 	return 0;
 }
