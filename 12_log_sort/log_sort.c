@@ -55,7 +55,6 @@ static int __merge_logs(uintptr_t *log_array, int log_idx, int log1_len,
 
 	if (!log1_ptr || !log2_ptr)
 		return -EINVAL;
-
 	/*
 	 * The data in the second logs are larger than those in the
 	 * first logs
@@ -64,6 +63,29 @@ static int __merge_logs(uintptr_t *log_array, int log_idx, int log1_len,
 		return 0;
 
 	log1_ptr = (uint32_t *)log_array[log_idx];
+	log2_ptr = (uint32_t *)log_array[log_idx + log1_len + log2_len - 1];
+
+	if (!log1_ptr || !log2_ptr)
+		return -EINVAL;
+	/*
+	 * All the data in the second logs are smaller than those in the first
+	 * logs.
+	 */
+	if (*log1_ptr > log2_ptr[NR_LOG_ENTRY - 1]) {
+		/* Switch the first log and second log */
+		for (i = log_idx + log1_len; i < log_idx + log1_len + log2_len;
+		     i++)
+			merge_array[i] = log_array[i];
+		for (i = log_idx + log1_len - 1; i >= log_idx; i--)
+			log_array[i + log2_len] = log_array[i];
+		for (i = log_idx + log1_len; i < log_idx + log1_len + log2_len;
+		     i++)
+		     	log_array[i - log1_len] = merge_array[i];
+		return 0;
+	}
+
+	log1_ptr = (uint32_t *)log_array[log_idx];
+	log2_ptr = (uint32_t *)log_array[log_idx + log1_len];
 	if (!log1_ptr)
 		return -EINVAL;
 
