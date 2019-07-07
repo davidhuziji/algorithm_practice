@@ -279,8 +279,6 @@ static int binary_search_circular(const int32_t *array, int len, int32_t val)
 		mid = start + ((end - start) >> 1);
 		if (array[mid] == val)
 			return mid;
-		printf("start[%d] %d mid[%d] %d end[%d] %d\n", start,
-		       array[start], mid, array[mid], end, array[end]);
 
 		/*
 		 * Val sits in the larger half of the circular.
@@ -289,19 +287,28 @@ static int binary_search_circular(const int32_t *array, int len, int32_t val)
 		 */
 		if (val > array[end]) {
 			if (array[mid] < val) {
-				if (array[mid] >= array[start])
+				if (array[mid] > array[start]) {
 					/*
 					 * mid sits in the same half as start.
 					 * Thus val is at the right of mid.
 					 */
 					start = mid + 1;
-				else
+				} else if (array[mid] < array[start]) {
 					/*
 					 * mid sits in the different half from
 					 * start.
 					 * Thus val is at the left of mid.
 					 */
 					end = mid - 1;
+				} else {
+					/*
+					 * Cannot tell whether start and mid
+					 * stay in the same half. Just sequeeze
+					 * the array little by little.
+					 */
+					start++;
+					end--;
+				}
 			} else {
 				end = mid - 1;
 			}
@@ -317,19 +324,28 @@ static int binary_search_circular(const int32_t *array, int len, int32_t val)
 			if (array[mid] < val) {
 				start = mid + 1;
 			} else {
-				if (array[mid] >= array[start])
+				if (array[mid] > array[start]) {
 					/*
 					 * mid sits in the same half as start.
 					 * Thus val is at the right of mid.
 					 */
 					start = mid + 1;
-				else
+				} else if (array[mid] < array[start]) {
 					/*
 					 * mid sits in the different half from
 					 * start.
 					 * Thus val is at the left of mid.
 					 */
 					end = mid - 1;
+				} else {
+					/*
+					 * Cannot tell whether start and mid
+					 * stay in the same half. Just sequeeze
+					 * the array little by little.
+					 */
+					start++;
+					end--;
+				}
 			}
 
 			continue;
