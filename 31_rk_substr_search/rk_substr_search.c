@@ -33,12 +33,22 @@ static int hash_cal(const char *str, size_t len)
 static int bk_search(const char *main_str, size_t main_len,
 		     const char *pat_str, size_t pat_len)
 {
-	int pat_hash, main_hash, i;
+	int pat_hash, main_hash, i, j;
 
 	pat_hash = hash_cal(pat_str, pat_len);
 	main_hash = hash_cal(main_str, pat_len);
-	if (pat_hash == main_hash)
-		return 0;
+	if (pat_hash == main_hash) {
+		/*
+		 * Compare the pattern and main strings char by char
+		 * to avoid hash table conflict.
+		 */
+		for (j = 0; j < pat_len; j++) {
+			if (main_str[j] != pat_str[j])
+				break;
+		}
+		if (j == pat_len)
+			return 0;
+	}
 
 	for (i = 1; i < main_len - pat_len; i++) {
 		main_hash -= (main_str[i - 1] - 'A') *
@@ -46,8 +56,18 @@ static int bk_search(const char *main_str, size_t main_len,
 		main_hash *= HASH_FACTOR;
 		main_hash += main_str[i + pat_len - 1] - 'A';
 
-		if (main_hash == pat_hash)
-			return i;
+		if (main_hash == pat_hash) {
+			/*
+			 * Compare the pattern and main strings char by char
+			 * to avoid hash table conflict.
+			 */
+			for (j = 0; j < pat_len; j++) {
+				if (main_str[j + i] != pat_str[j])
+					break;
+			}
+			if (j == pat_len)
+				return i;
+		}
 	}
 
 	printf("Fail to find substring\n");
