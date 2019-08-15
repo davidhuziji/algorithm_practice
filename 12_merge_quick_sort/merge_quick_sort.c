@@ -157,10 +157,12 @@ static int __quick_partition(char *array, int start_idx, int end_idx)
 		/*
 		 * Exchange the smaller element with the larger element anchor
 		 */
-		if ((array[i] <= pivot) && (i != large_idx)) {
-			tmp = array[large_idx];
-			array[large_idx] = array[i];
-			array[i] = tmp;
+		if (array[i] < pivot) {
+			if (i != large_idx) {
+				tmp = array[large_idx];
+				array[large_idx] = array[i];
+				array[i] = tmp;
+			}
 
 			large_idx++;
 		}
