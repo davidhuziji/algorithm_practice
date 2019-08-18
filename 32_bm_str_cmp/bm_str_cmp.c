@@ -104,6 +104,9 @@ static int get_good_str_step(int *suffix, bool *prefix, int len, int bad_pos)
 {
 	int suffix_idx, i;
 
+	if (bad_pos = (len - 1))
+		return 1;
+
 	/* Search if duplicated end stirng exists or sub-string existis */
 	suffix_idx = suffix[len - bad_pos - 1];
 	if (suffix_idx != -1) {
@@ -158,11 +161,9 @@ static int bm_search(const char *main_str, size_t main_len,
 			return i;
 
 		bad_step = get_bad_step(bad_ch_map, main_str[i + j], j);
-		good_step = 0;
 		/* If the last char doesn't match, good string cannot work? */
-		if (j < pat_len - 1)
-			good_step = get_good_str_step(suffix_map, prefix_map,
-						      pat_len, j);
+		good_step = get_good_str_step(suffix_map, prefix_map,
+					      pat_len, j);
 
 		i += (bad_step > good_step) ? bad_step : good_step;
 	}
